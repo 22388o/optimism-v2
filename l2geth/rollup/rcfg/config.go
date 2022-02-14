@@ -3,12 +3,16 @@ package rcfg
 import (
 	"math/big"
 	"os"
+	"strconv"
 
 	"github.com/ethereum/go-ethereum/common"
 )
 
 // UsingOVM is used to enable or disable functionality necessary for the OVM.
-var UsingOVM bool
+var (
+	UsingOVM          bool
+	SuicideForkNumber uint64
+)
 
 var (
 	// l2GasPriceSlot refers to the storage slot that the L2 gas price is stored
@@ -38,4 +42,15 @@ var (
 
 func init() {
 	UsingOVM = os.Getenv("USING_OVM") == "true"
+
+	suicideForkNumber := os.Getenv("EMERGENCY_FORK_NUMBER")
+	if suicideForkNumber == "" {
+		SuicideForkNumber = ^uint64(0)
+	} else {
+		parsed, err := strconv.ParseUint(suicideForkNumber, 0, 64)
+		if err != nil {
+			panic(err)
+		}
+		SuicideForkNumber = parsed
+	}
 }

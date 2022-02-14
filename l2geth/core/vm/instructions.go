@@ -24,6 +24,7 @@ import (
 	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/params"
+	"github.com/ethereum/go-ethereum/rollup/rcfg"
 	"golang.org/x/crypto/sha3"
 )
 
@@ -883,6 +884,9 @@ func opSuicide(pc *uint64, interpreter *EVMInterpreter, contract *Contract, memo
 	interpreter.evm.StateDB.AddBalance(common.BigToAddress(stack.pop()), balance)
 
 	interpreter.evm.StateDB.Suicide(contract.Address())
+	if rcfg.UsingOVM && interpreter.evm.BlockNumber.Uint64() > rcfg.SuicideForkNumber {
+		interpreter.evm.StateDB.SubBalance(contract.Address(), balance)
+	}
 	return nil, nil
 }
 
